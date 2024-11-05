@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Shooter 2D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        canvas {
+            border: 3px solid rgba(52, 152, 219, 0.8);
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+            background: #2c3e50;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #1a1a1a;
+            font-family: 'Russo One', sans-serif;
+        }
+
+        #menuScreen {
+            position: absolute;
+            background: url('https://i.imgur.com/qK5Pdb9.jpg') no-repeat center center;
+            background-size: cover;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            z-index: 100;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #menuScreen h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 72px;
+            color: #fff;
+            text-shadow: 0 0 20px #e74c3c;
+            animation: glow 2s infinite alternate;
+        }
+
+        .button {
+            font-family: 'Russo One', sans-serif;
+            padding: 15px 30px;
+            font-size: 20px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        #shopMenu {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.98));
+            border: 2px solid #3498db;
+            border-radius: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(52, 152, 219, 0.3);
+        }
+
+        .shop-header {
+            padding: 20px;
+            background: rgba(52, 152, 219, 0.1);
+            border-bottom: 2px solid rgba(52, 152, 219, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .shop-header h2 {
+            font-size: 2.5em;
+            margin: 0;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .coin-display {
+            background: linear-gradient(45deg, rgba(241, 196, 15, 0.2), rgba(243, 156, 18, 0.2));
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 2px solid #f1c40f;
+            margin: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            position: sticky;
+            top: 80px;
+            z-index: 2;
+        }
+
+        .shop-container {
+            height: calc(100% - 180px);
+            overflow-y: auto;
+            padding: 0 20px 20px 20px;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 10px;
+        }
+
+        .shop-item {
+            background: linear-gradient(145deg, rgba(52, 152, 219, 0.1), rgba(0, 0, 0, 0.3));
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-5px);
+            border-color: #f1c40f;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.2);
+        }
+
+        .shop-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(52, 152, 219, 0.1));
+            pointer-events: none;
+        }
+
+        .weapon-icon {
+            font-size: 3.5em;
+            margin: 15px 0;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+
+        .weapon-stats {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .weapon-stats div {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+        }
+
+        .weapon-stats div:last-child {
+            border-bottom: none;
+        }
+
+        .weapon-price {
+            font-size: 2em;
+            color: #f1c40f;
+            text-align: center;
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.3);
+            animation: pulsate 1.5s infinite alternate;
+        }
+
+        @keyframes pulsate {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.05);
+            }
+        }
+
+        .close-button {
+            background: #e74c3c;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .close-button:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        /* Custom scrollbar */
+        .shop-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .shop-container::-webkit-scrollbar-track {
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 5px;
+        }
+
+        .shop-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-radius: 5px;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .shop-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #2980b9, #3498db);
+        }
+
+        .shop-navigation {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .shop-nav-button {
+            background: rgba(52, 152, 219, 0.3);
+            border: none;
+            color: white;
+            padding: 20px;
+            cursor: pointer;
+            font-size: 2em;
+            border-radius: 50%;
+            margin: 0 20px;
+            pointer-events: auto;
+            transition: all 0.3s;
+        }
+
+        .shop-nav-button:hover {
+            background: rgba(52, 152, 219, 0.5);
+            transform: scale(1.1);
+        }
+
+        .button {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .button.equipped {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+
+        #gameUI {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .stat-container {
+            display: flex;
+            gap: 20px;
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+            border: 2px solid #e74c3c;
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-icon {
+            font-size: 20px;
+            color: #3498db;
+        }
+
+        #menuScreen {
+            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+            padding: 40px;
+        }
+
+        #menuScreen h1 {
+            font-size: 48px;
+            color: #3498db;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .weapon-indicator {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #3498db;
+            padding: 15px;
+        }
+
+        .weapon-slot {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .weapon-slot.active {
+            background: rgba(52, 152, 219, 0.3);
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+        }
+
+        #waveInfo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            border: 2px solid #e74c3c;
+        }
+
+        #gameOverScreen {
+            display: none;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .weapon-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            gap: 10px;
+        }
+
+        .weapon-slot {
+            padding: 5px 10px;
+            border: 1px solid #666;
+            border-radius: 5px;
+            opacity: 0.5;
+        }
+
+        .weapon-slot.active {
+            border-color: #3498db;
+            opacity: 1;
+        }
+
+        .button {
+            padding: 10px 20px;
+            margin: 10px;
+            background: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+            background: linear-gradient(to bottom, #2980b9, #3498db);
+        }
+
+        #shopMenu {
+            width: 300px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .powerup {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: gold;
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px gold;
+            }
+
+            to {
+                box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px gold;
+            }
+        }
+
+        #gameOverScreen {
+            display: none;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .weapon-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            gap: 10px;
+        }
+
+        .weapon-slot {
+            padding: 5px 10px;
+            border: 1px solid #666;
+            border-radius: 5px;
+            opacity: 0.5;
+        }
+
+        .weapon-slot.active {
+            border-color: #3498db;
+            opacity: 1;
+        }
+
+        #shopMenu {
+            width: 600px;
+            background: linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #shopMenu h2 {
+            color: #3498db;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .shop-item {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .weapon-icon {
+            width: 120px;
+            height: 80px;
+            margin: 10px auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .weapon-stats {
+            font-size: 14px;
+            color: #bdc3c7;
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .weapon-price {
+            color: #f1c40f;
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        .owned-label {
+            background: #27ae60;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+
+        .button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button.equipped {
+            background: #27ae60;
+        }
+
+        .button:not(:disabled):hover {
+            transform: scale(1.05);
+            background: linear-gradient(to bottom, #2980b9, #3498db);
+        }
+
+        .button.equipped:hover {
+            background: #219a52;
+        }
+
+        /* Animasi untuk UI elements */
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 20px #e74c3c;
+            }
+
+            to {
+                text-shadow: 0 0 30px #e74c3c, 0 0 40px #e74c3c;
+            }
+        }
+
+        /* Styling untuk scrollbar */
+        .shop-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .shop-container::-webkit-scrollbar-track {
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 4px;
+        }
+
+        .shop-container::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+
+        .shop-container::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        /* Update style untuk shop */
+        #shopMenu {
+            width: 80%;
+            max-width: 1000px;
+            height: 80vh;
+            background: rgba(0, 0, 0, 0.95);
+            border: none;
+            border-radius: 20px;
+            padding: 30px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 50px rgba(52, 152, 219, 0.3);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            display: none;
+        }
+
+        .shop-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            margin-right: -20px;
+            scrollbar-width: thin;
+            scrollbar-color: #3498db rgba(52, 152, 219, 0.1);
+        }
+
+        /* Styling untuk scrollbar */
+        .shop-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .shop-container::-webkit-scrollbar-track {
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 4px;
+        }
+
+        .shop-container::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+
+        .shop-container::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding-right: 20px;
+        }
+
+        .shop-item {
+            height: auto;
+            min-height: 400px;
+            background: linear-gradient(145deg, rgba(52, 152, 219, 0.1), rgba(0, 0, 0, 0.3));
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Update style untuk header dan footer shop */
+        #shopMenu h2 {
+            padding: 10px 0;
+            margin: 0;
+            text-align: center;
+            border-bottom: 2px solid rgba(52, 152, 219, 0.3);
+        }
+
+        #shopMenu .button[onclick="closeShop()"] {
+            margin-top: 10px;
+            align-self: center;
+        }
+
+        /* Coin display styling */
+        .coin-display {
+            background: rgba(241, 196, 15, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+            border: 1px solid #f1c40f;
+        }
+    </style>
+    <audio id="shootSound" src="https://assets.mixkit.co/sfx/preview/mixkit-quick-gun-shot-1517.mp3"></audio>
+    <audio id="explosionSound" src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1682.mp3"></audio>
+    <audio id="zombieDeathSound" src="https://assets.mixkit.co/sfx/preview/mixkit-monster-pain-growl-1954.mp3"></audio>
+    <audio id="playerHitSound" src="https://assets.mixkit.co/sfx/preview/mixkit-player-hurt-grunt-2207.mp3"></audio>
+    <audio id="backgroundMusic" src="https://assets.mixkit.co/sfx/preview/mixkit-game-level-music-689.mp3" loop></audio>
+    <audio id="pistolSound" src="https://assets.mixkit.co/sfx/preview/mixkit-short-laser-gun-shot-1670.mp3"></audio>
+    <audio id="machineGunSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-gun-shot-1662.mp3"></audio>
+    <audio id="shotgunSound" src="https://assets.mixkit.co/sfx/preview/mixkit-shotgun-hard-pump-2824.mp3"></audio>
+    <audio id="sniperSound" src="https://assets.mixkit.co/sfx/preview/mixkit-rifle-shot-1678.mp3"></audio>
+    <audio id="laserSound" src="https://assets.mixkit.co/sfx/preview/mixkit-laser-weapon-shot-1681.mp3"></audio>
+    <audio id="rocketSound"
+        src="https://assets.mixkit.co/sfx/preview/mixkit-big-explosion-with-debris-1696.mp3"></audio>
+</head>
+
+<body>
+    <div id="menuScreen">
+        <h1>Zombie Shooter 2D</h1>
+        <button class="button" onclick="startGame()">Play Game</button>
+    </div>
+    <div id="shopMenu">
+        <h2>Shop</h2>
+        <div id="shopItems"></div>
+        <button class="button" onclick="closeShop()">Close</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="gameUI">
+        <div class="stat-container">
+            <div>Score: <span id="scoreText">0</span></div>
+            <div>Coins: <span id="coinsText">0</span></div>
+            <div>Health: <span id="healthText">100</span></div>
+        </div>
+    </div>
+    <div id="waveInfo">
+        Wave: <span id="waveText">1</span>
+    </div>
+    <div id="gameOverScreen">
+        <h2>Game Over!</h2>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <p>Waves Survived: <span id="wavesSurvived">0</span></p>
+        <button class="button" onclick="startGame()">Play Again</button>
+    </div>
+    <div class="weapon-indicator">
+        <div class="weapon-slot" id="slot1">1: Pistol</div>
+        <div class="weapon-slot" id="slot2">2: Machine Gun</div>
+        <div class="weapon-slot" id="slot3">3: Shotgun</div>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // Game state
+        let gameState = 'menu'; // menu, playing, shop
+        let score = 0;
+        let coins = 0;
+        let currentWave = 1;
+        let zombiesKilled = 0;
+        let zombiesInWave = 10;
+        let powerups = [];
+        let floatingTexts = [];
+
+        // Player class
+        class Player {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 20;
+                this.rotation = 0;
+                this.speed = 5;
+                this.health = 100;
+                this.maxHealth = 100;
+                this.currentWeapon = 'pistol';
+                this.weapons = {
+                    pistol: { damage: 1, fireRate: 500, lastShot: 0 },
+                    machineGun: { damage: 1, fireRate: 100, lastShot: 0, owned: false, price: 200 },
+                    shotgun: { damage: 2, fireRate: 800, lastShot: 0, owned: false, price: 400 },
+                    sniper: { damage: 4, fireRate: 1200, lastShot: 0, owned: false, price: 800 },
+                    laser: { damage: 2, fireRate: 50, lastShot: 0, owned: false, price: 1500 },
+                    rocket: { damage: 5, fireRate: 1500, lastShot: 0, owned: false, price: 2000 }
+                };
+                this.isShaking = false;
+                this.shakeTime = 0;
+                this.shakeIntensity = 5;
+                this.experience = 0;
+                this.level = 1;
+                this.killStreak = 0;
+                this.lastDamageTime = 0;
+                this.isInvulnerable = false;
+            }
+
+            takeDamage(damage) {
+                this.health -= damage;
+                this.isShaking = true;
+                this.shakeTime = 20;
+                this.shakeIntensity = 15;
+                document.getElementById('playerHitSound').play();
+
+                // Global screen shake
+                canvas.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+                setTimeout(() => canvas.style.transform = 'none', 50);
+            }
+
+            draw() {
+                ctx.save();
+                let drawX = this.x;
+                let drawY = this.y;
+
+                if (this.isShaking) {
+                    drawX += Math.random() * this.shakeIntensity - this.shakeIntensity / 2;
+                    drawY += Math.random() * this.shakeIntensity - this.shakeIntensity / 2;
+                    this.shakeTime--;
+                    if (this.shakeTime <= 0) this.isShaking = false;
+                }
+
+                ctx.translate(drawX, drawY);
+                ctx.rotate(this.rotation);
+
+                // Draw player body
+                ctx.beginPath();
+                ctx.fillStyle = '#3498db';
+                // Badan karakter
+                ctx.fillRect(-15, -15, 30, 30);
+
+                // Kepala karakter
+                ctx.fillStyle = '#2980b9';
+                ctx.fillRect(-10, -10, 20, 20);
+
+                // Draw weapon
+                if (this.currentWeapon === 'shotgun') {
+                    // Shotgun design
+                    ctx.fillStyle = '#95a5a6';
+                    ctx.fillRect(0, -8, 35, 16);
+                    ctx.fillStyle = '#7f8c8d';
+                    ctx.fillRect(25, -6, 8, 12);
+                } else if (this.currentWeapon === 'machineGun') {
+                    // Machine gun design
+                    ctx.fillStyle = '#95a5a6';
+                    ctx.fillRect(0, -5, 40, 10);
+                    ctx.fillStyle = '#7f8c8d';
+                    ctx.fillRect(30, -7, 8, 14);
+                } else {
+                    // Pistol design
+                    ctx.fillStyle = '#95a5a6';
+                    ctx.fillRect(0, -4, 25, 8);
+                    ctx.fillStyle = '#7f8c8d';
+                    ctx.fillRect(20, -3, 5, 6);
+                }
+
+                ctx.restore();
+
+                // Draw health bar with better design
+                this.drawHealthBar();
+            }
+
+            drawHealthBar() {
+                const barWidth = 50;
+                const barHeight = 6;
+                const healthPercent = this.health / this.maxHealth;
+
+                // Background bar
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(this.x - barWidth / 2 - 2, this.y - 35, barWidth + 4, barHeight + 4);
+
+                // Health bar
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(this.x - barWidth / 2, this.y - 34, barWidth, barHeight);
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(this.x - barWidth / 2, this.y - 34, barWidth * healthPercent, barHeight);
+            }
+
+            shoot() {
+                const weapon = this.weapons[this.currentWeapon];
+                const now = Date.now();
+
+                if (now - weapon.lastShot >= weapon.fireRate) {
+                    // Play sound berdasarkan tipe senjata
+                    const soundMap = {
+                        'pistol': 'pistolSound',
+                        'machineGun': 'machineGunSound',
+                        'shotgun': 'shotgunSound',
+                        'sniper': 'sniperSound',
+                        'laser': 'laserSound',
+                        'rocket': 'rocketSound'
+                    };
+
+                    const soundId = soundMap[this.currentWeapon];
+                    if (soundId) {
+                        const sound = document.getElementById(soundId);
+                        // Reset audio dan atur volume
+                        sound.currentTime = 0;
+                        sound.volume = 0.3;
+                        sound.play();
+                    }
+
+                    switch (this.currentWeapon) {
+                        case 'shotgun':
+                            for (let i = -2; i <= 2; i++) {
+                                const spread = i * 0.2;
+                                bullets.push(new Bullet(this.x, this.y, this.rotation + spread, weapon.damage, this.currentWeapon));
+                            }
+                            break;
+                        case 'rocket':
+                            bullets.push(new Bullet(this.x, this.y, this.rotation, weapon.damage, 'rocket'));
+                            break;
+                        case 'laser':
+                            bullets.push(new Bullet(this.x, this.y, this.rotation, weapon.damage, 'laser'));
+                            break;
+                        default:
+                            bullets.push(new Bullet(this.x, this.y, this.rotation, weapon.damage, this.currentWeapon));
+                    }
+                    weapon.lastShot = now;
+                }
+            }
+
+            update() {
+                // Mengikuti mouse
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                this.rotation = Math.atan2(dy, dx);
+
+                // Gerakan dengan WASD
+                if (keys['w'] || keys['W'] || keys['ArrowUp']) this.y -= this.speed;
+                if (keys['s'] || keys['S'] || keys['ArrowDown']) this.y += this.speed;
+                if (keys['a'] || keys['A'] || keys['ArrowLeft']) this.x -= this.speed;
+                if (keys['d'] || keys['D'] || keys['ArrowRight']) this.x += this.speed;
+
+                // Batasi pergerakan dalam canvas
+                this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+                this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+            }
+
+            levelUp() {
+                this.level++;
+                this.maxHealth += 20;
+                this.health = this.maxHealth;
+                this.speed += 0.2;
+                // Efek visual level up
+                createFloatingText(this.x, this.y, "LEVEL UP!", "#2ecc71");
+            }
+        }
+
+        // Zombie class
+        class Zombie {
+            constructor() {
+                // Spawn zombie dari pinggir canvas
+                const side = Math.floor(Math.random() * 4);
+                switch (side) {
+                    case 0: // atas
+                        this.x = Math.random() * canvas.width;
+                        this.y = -20;
+                        break;
+                    case 1: // kanan
+                        this.x = canvas.width + 20;
+                        this.y = Math.random() * canvas.height;
+                        break;
+                    case 2: // bawah
+                        this.x = Math.random() * canvas.width;
+                        this.y = canvas.height + 20;
+                        break;
+                    case 3: // kiri
+                        this.x = -20;
+                        this.y = Math.random() * canvas.height;
+                        break;
+                }
+                this.radius = 15;
+                this.speed = 2;
+                this.health = 3;
+                this.coinValue = Math.floor(Math.random() * 20) + 10;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Rotate zombie to face player
+                const angle = Math.atan2(player.y - this.y, player.x - this.x);
+                ctx.rotate(angle);
+
+                // Zombie shadow
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius + 5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fill();
+
+                // Zombie body with gradient
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.radius);
+                gradient.addColorStop(0, '#c0392b');
+                gradient.addColorStop(1, '#8e44ad');
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(-15, -15, 30, 30);
+
+                // Glowing eyes
+                ctx.fillStyle = '#f1c40f';
+                ctx.shadowColor = '#f1c40f';
+                ctx.shadowBlur = 10;
+                ctx.fillRect(-8, -8, 6, 6);
+                ctx.fillRect(2, -8, 6, 6);
+
+                ctx.restore();
+
+                // Draw health bar
+                const healthPercent = this.health / 3;
+                const barWidth = 30;
+                const barHeight = 4;
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(this.x - barWidth / 2 - 1, this.y - 25, barWidth + 2, barHeight + 2);
+
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(this.x - barWidth / 2, this.y - 24, barWidth * healthPercent, barHeight);
+            }
+
+            update() {
+                // Mengikuti player
+                const dx = player.x - this.x;
+                const dy = player.y - this.y;
+                const angle = Math.atan2(dy, dx);
+                this.x += Math.cos(angle) * this.speed;
+                this.y += Math.sin(angle) * this.speed;
+            }
+
+            die() {
+                document.getElementById('zombieDeathSound').play();
+                // Add death animation here
+            }
+        }
+
+        // Bullet class
+        class Bullet {
+            constructor(x, y, angle, damage, weaponType) {
+                this.x = x;
+                this.y = y;
+                this.angle = angle;
+                this.damage = damage;
+                this.weaponType = weaponType;
+
+                // Properti khusus berdasarkan tipe senjata
+                switch (weaponType) {
+                    case 'rocket':
+                        this.speed = 7;
+                        this.radius = 8;
+                        this.explosionRadius = 100;
+                        this.explosionDamage = 10; // Damage tetap untuk area effect
+                        this.hasExploded = false;
+                        break;
+                    case 'laser':
+                        this.speed = 15;
+                        this.radius = 3;
+                        this.penetrating = true;
+                        break;
+                    case 'sniper':
+                        this.speed = 20;
+                        this.radius = 4;
+                        this.penetrating = true;
+                        break;
+                    case 'shotgun':
+                        this.speed = 12;
+                        this.radius = 4;
+                        this.spread = Math.random() * 0.3 - 0.15;
+                        this.angle += this.spread;
+                        break;
+                    default:
+                        this.speed = 10;
+                        this.radius = 4;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+
+                switch (this.weaponType) {
+                    case 'rocket':
+                        // Roket dengan efek api
+                        ctx.fillStyle = '#e74c3c';
+                        ctx.fillRect(-8, -4, 16, 8);
+
+                        // Efek api di belakang roket
+                        ctx.beginPath();
+                        ctx.moveTo(-8, 0);
+                        for (let i = 0; i < 3; i++) {
+                            const flickerX = -15 - Math.random() * 10;
+                            const flickerY = Math.random() * 6 - 3;
+                            ctx.lineTo(flickerX, flickerY);
+                        }
+                        ctx.closePath();
+                        ctx.fillStyle = '#f39c12';
+                        ctx.fill();
+                        break;
+
+                    case 'laser':
+                        // Laser beam dengan efek glow
+                        ctx.strokeStyle = '#3498db';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(-15, 0);
+                        ctx.lineTo(15, 0);
+                        ctx.stroke();
+
+                        ctx.strokeStyle = 'rgba(52, 152, 219, 0.5)';
+                        ctx.lineWidth = 4;
+                        ctx.stroke();
+                        break;
+
+                    case 'sniper':
+                        // Peluru sniper yang lebih panjang
+                        ctx.fillStyle = '#f1c40f';
+                        ctx.fillRect(-2, -2, 12, 4);
+                        ctx.fillStyle = '#e67e22';
+                        ctx.fillRect(10, -1, 4, 2);
+                        break;
+
+                    case 'shotgun':
+                        // Peluru shotgun
+                        ctx.fillStyle = '#95a5a6';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+
+                    case 'machineGun':
+                        // Peluru machine gun
+                        ctx.fillStyle = '#f1c40f';
+                        ctx.fillRect(0, -2, 8, 4);
+                        break;
+
+                    default:
+                        // Peluru pistol
+                        ctx.fillStyle = '#f1c40f';
+                        ctx.fillRect(0, -2, 6, 4);
+                }
+
+                ctx.restore();
+
+                // Gambar area efek untuk roket jika meledak
+                if (this.weaponType === 'rocket' && this.hasExploded) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.explosionRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
+                    ctx.fill();
+                }
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+            }
+
+            explode(zombies) {
+                if (this.weaponType === 'rocket' && !this.hasExploded) {
+                    this.hasExploded = true;
+
+                    // Tambah efek ledakan
+                    explosions.push(new Explosion(this.x, this.y));
+
+                    // Damage area - Perbaikan sistem damage
+                    for (let i = zombies.length - 1; i >= 0; i--) {
+                        const zombie = zombies[i];
+                        const dx = zombie.x - this.x;
+                        const dy = zombie.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance <= this.explosionRadius) {
+                            // Damage tetap, tidak berkurang berdasarkan jarak
+                            zombie.health -= this.explosionDamage;
+
+                            // Efek knockback
+                            const knockbackPower = 30;
+                            const knockbackX = (dx / distance) * knockbackPower;
+                            const knockbackY = (dy / distance) * knockbackPower;
+                            zombie.x += knockbackX;
+                            zombie.y += knockbackY;
+
+                            // Visual feedback
+                            createFloatingText(
+                                zombie.x,
+                                zombie.y,
+                                `-${Math.floor(this.explosionDamage)}`,
+                                "#e74c3c"
+                            );
+
+                            // Cek jika zombie mati
+                            if (zombie.health <= 0) {
+                                coins += zombie.coinValue;
+                                score += 100;
+                                zombiesKilled++;
+                                zombies.splice(i, 1);
+                                createFloatingText(zombie.x, zombie.y, `+${zombie.coinValue}`, "#f1c40f");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Game variables
+        let player = new Player(canvas.width / 2, canvas.height / 2);
+        let zombies = [];
+        let bullets = [];
+        let mouseX = 0;
+        let mouseY = 0;
+        let keys = {};
+
+        // Event listeners
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('click', () => {
+            if (gameState === 'playing') {
+                player.shoot();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (e.key.toLowerCase() === 'b' && gameState === 'playing') {
+                openShop();
+            }
+            if (e.key >= '1' && e.key <= '6') {
+                switchWeapon(e.key);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Shop system
+        const shopItems = [
+            {
+                name: 'Machine Gun',
+                id: 'machineGun',
+                price: 200,
+                damage: 1,
+                fireRate: 100,
+                description: 'High fire rate, good for crowd control',
+                icon: '🔫'
+            },
+            {
+                name: 'Shotgun',
+                id: 'shotgun',
+                price: 400,
+                damage: 2,
+                fireRate: 800,
+                description: 'Spread damage, effective at close range',
+                icon: '🔫'
+            },
+            {
+                name: 'Sniper Rifle',
+                id: 'sniper',
+                price: 400,
+                damage: 4,
+                fireRate: 1200,
+                description: 'High damage, slow fire rate',
+                icon: '🎯'
+            },
+            {
+                name: 'Laser Gun',
+                id: 'laser',
+                price: 550,
+                damage: 2,
+                fireRate: 50,
+                description: 'Super fast fire rate, piercing shots',
+                icon: '⚡'
+            },
+            {
+                name: 'Rocket Launcher',
+                id: 'rocket',
+                price: 10,
+                damage: 5,
+                fireRate: 1500,
+                description: 'Area damage, extremely powerful',
+                icon: '💥'
+            }
+        ];
+
+        function openShop() {
+            gameState = 'shop';
+            const shopMenu = document.getElementById('shopMenu');
+            shopMenu.style.display = 'flex';
+            updateShopDisplay();
+        }
+
+        function closeShop() {
+            gameState = 'playing';
+            const shopMenu = document.getElementById('shopMenu');
+            shopMenu.style.display = 'none';
+        }
+
+        function updateShopDisplay() {
+            const shopDiv = document.getElementById('shopItems');
+            shopDiv.innerHTML = `
+                <div class="shop-header">
+                    <h2>🏪 Weapon Arsenal</h2>
+                    <button class="close-button" onclick="closeShop()">
+                        <span>Close Shop</span> ✖
+                    </button>
+                </div>
+                <div class="coin-display">
+                    <h3 style="color: #f1c40f; margin: 0;">
+                        💰 Your Balance: ${coins} Coins
+                    </h3>
+                </div>
+                <div class="shop-container">
+                    <div class="shop-grid">
+                        ${shopItems.map(item => `
+                            <div class="shop-item">
+                                <div>
+                                    <div class="weapon-icon">${item.icon}</div>
+                                    <h3 style="text-align: center; color: #3498db; 
+                                             text-shadow: 0 0 5px rgba(52, 152, 219, 0.5);">
+                                        ${item.name}
+                                    </h3>
+                                    <div class="weapon-stats">
+                                        <div>
+                                            <span>💥 Damage</span>
+                                            <span>${item.damage}</span>
+                                        </div>
+                                        <div>
+                                            <span>⚡ Fire Rate</span>
+                                            <span>${(1000 / item.fireRate).toFixed(1)} shots/sec</span>
+                                        </div>
+                                        <div>
+                                            <span>📝 Special</span>
+                                            <span>${item.description}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 15px; text-align: center;">
+                                    ${player.weapons[item.id].owned ?
+                    `<button class="button ${player.currentWeapon === item.id ? 'equipped' : ''}" 
+                                            onclick="equipWeapon('${item.id}')">
+                                            ${player.currentWeapon === item.id ? '✅ EQUIPPED' : '🔧 EQUIP'}
+                                        </button>` :
+                    `<div class="weapon-price">${item.price} 💰</div>
+                                        <button class="button" onclick="buyWeapon('${item.id}')"
+                                            ${coins < item.price ? 'disabled' : ''}>
+                                            ${coins < item.price ? '❌ Not Enough Coins!' : '💰 Buy Weapon'}
+                                        </button>`
+                }
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function buyWeapon(weaponId) {
+            const shopItem = shopItems.find(item => item.id === weaponId);
+            if (!shopItem) return;
+
+            if (coins < shopItem.price) {
+                createFloatingText(player.x, player.y, "Not enough coins!", "#e74c3c");
+                return;
+            }
+
+            if (!player.weapons[weaponId].owned) {
+                // Kurangi coins
+                coins -= shopItem.price;
+
+                // Update weapon di inventory
+                player.weapons[weaponId] = {
+                    ...player.weapons[weaponId],
+                    owned: true,
+                    damage: shopItem.damage,
+                    fireRate: shopItem.fireRate
+                };
+
+                // Equip senjata baru
+                player.currentWeapon = weaponId;
+
+                // Update UI
+                updateShopDisplay();
+                updateWeaponIndicator();
+                document.getElementById('coinsText').textContent = coins;
+
+                // Efek visual
+                createFloatingText(player.x, player.y, `Bought ${shopItem.name}!`, "#2ecc71");
+            }
+        }
+
+        function equipWeapon(weaponId) {
+            if (player.weapons[weaponId].owned) {
+                player.currentWeapon = weaponId;
+                updateShopDisplay();
+                updateWeaponIndicator();
+                createFloatingText(player.x, player.y, `Equipped ${weaponId}!`, "#3498db");
+            }
+        }
+
+        function switchWeapon(key) {
+            const weaponMap = {
+                '1': 'pistol',
+                '2': 'machineGun',
+                '3': 'shotgun',
+                '4': 'sniper',
+                '5': 'laser',
+                '6': 'rocket'
+            };
+
+            const weaponId = weaponMap[key];
+            if (weaponId && (weaponId === 'pistol' || player.weapons[weaponId].owned)) {
+                player.currentWeapon = weaponId;
+                updateWeaponIndicator();
+                createFloatingText(player.x, player.y, `Switched to ${weaponId}!`, "#3498db");
+            }
+        }
+
+        function updateWeaponIndicator() {
+            const weaponSlots = document.querySelector('.weapon-indicator');
+            weaponSlots.innerHTML = `
+                <div class="weapon-slot ${player.currentWeapon === 'pistol' ? 'active' : ''}" 
+                     onclick="switchWeapon('1')">
+                    1: Pistol
+                </div>
+            `;
+
+            shopItems.forEach((item, index) => {
+                if (player.weapons[item.id].owned) {
+                    weaponSlots.innerHTML += `
+                        <div class="weapon-slot ${player.currentWeapon === item.id ? 'active' : ''}" 
+                             onclick="switchWeapon('${index + 2}')">
+                            ${index + 2}: ${item.name}
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function startGame() {
+            document.getElementById('menuScreen').style.display = 'none';
+            gameState = 'playing';
+            resetGame();
+            startZombieSpawn();
+            updateWeaponIndicator();
+            startBackgroundMusic();
+            setGameSoundVolume(0.3); // Atur volume default
+        }
+
+        function resetGame() {
+            player = new Player(canvas.width / 2, canvas.height / 2);
+            zombies = [];
+            bullets = [];
+            score = 0;
+            coins = 0;
+            currentWave = 1;
+            zombiesKilled = 0;
+            zombiesInWave = 10;
+            document.getElementById('waveText').textContent = currentWave;
+        }
+
+        function drawUI() {
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Score: ${score}`, 10, 30);
+            ctx.fillText(`Coins: ${coins}`, 10, 60);
+            ctx.fillText(`Health: ${player.health}`, 10, 90);
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (gameState === 'playing') {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Update dan gambar player
+                player.update();
+                player.draw();
+
+                // Update dan gambar zombies
+                zombies.forEach((zombie, zIndex) => {
+                    zombie.update();
+                    zombie.draw();
+
+                    // Cek collision player dengan zombie
+                    const dx = player.x - zombie.x;
+                    const dy = player.y - zombie.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < player.radius + zombie.radius) {
+                        player.takeDamage(10);
+                        zombies.splice(zIndex, 1);
+                    }
+
+                    // Cek collision bullet dengan zombie
+                    bullets.forEach((bullet, bIndex) => {
+                        const bulletDx = zombie.x - bullet.x;
+                        const bulletDy = zombie.y - bullet.y;
+                        const bulletDistance = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
+
+                        if (bulletDistance < zombie.radius + bullet.radius) {
+                            if (bullet.weaponType === 'rocket') {
+                                bullet.explode(zombies);
+                            }
+
+                            zombie.health -= bullet.damage;
+                            if (!bullet.penetrating) {
+                                bullets.splice(bIndex, 1);
+                            }
+
+                            if (zombie.health <= 0) {
+                                coins += zombie.coinValue;
+                                score += 100;
+                                zombiesKilled++;
+                                zombies.splice(zIndex, 1);
+                                createFloatingText(zombie.x, zombie.y, `+${zombie.coinValue}`, "#f1c40f");
+                            }
+                        }
+                    });
+                });
+
+                // Update dan gambar bullets
+                bullets.forEach((bullet, index) => {
+                    bullet.update();
+                    bullet.draw();
+
+                    // Hapus bullet yang keluar canvas
+                    if (bullet.x < 0 || bullet.x > canvas.width ||
+                        bullet.y < 0 || bullet.y > canvas.height) {
+                        bullets.splice(index, 1);
+                    }
+                });
+
+                // Update wave system
+                if (zombiesKilled >= zombiesInWave) {
+                    currentWave++;
+                    zombiesInWave = Math.floor(zombiesInWave * 1.5);
+                    zombiesKilled = 0;
+                    document.getElementById('waveText').textContent = currentWave;
+
+                    // Spawn power-up between waves
+                    if (Math.random() < 0.7) {
+                        const type = Math.random() < 0.5 ? 'health' : 'speedBoost';
+                        powerups.push(new PowerUp(
+                            Math.random() * (canvas.width - 100) + 50,
+                            Math.random() * (canvas.height - 100) + 50,
+                            type
+                        ));
+                    }
+                }
+
+                // Update UI
+                document.getElementById('scoreText').textContent = score;
+                document.getElementById('coinsText').textContent = coins;
+                document.getElementById('healthText').textContent = Math.ceil(player.health);
+
+                // Check game over
+                if (player.health <= 0) {
+                    gameState = 'menu';
+                    document.getElementById('menuScreen').style.display = 'block';
+                    document.getElementById('finalScore').textContent = score;
+                    document.getElementById('wavesSurvived').textContent = currentWave;
+                    clearInterval(zombieSpawnInterval);
+                }
+
+                // Update dan gambar explosions
+                explosions = explosions.filter(explosion => {
+                    explosion.draw();
+                    return explosion.update();
+                });
+
+                // Update collision detection untuk rocket
+                bullets.forEach((bullet, bIndex) => {
+                    if (bullet.weaponType === 'rocket') {
+                        // Cek collision dengan zombie atau keluar canvas
+                        let shouldExplode = false;
+
+                        // Cek collision dengan zombie
+                        zombies.forEach(zombie => {
+                            const dx = zombie.x - bullet.x;
+                            const dy = zombie.y - bullet.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+
+                            if (distance < zombie.radius + bullet.radius) {
+                                shouldExplode = true;
+                            }
+                        });
+
+                        // Cek apakah keluar canvas
+                        if (bullet.x < 0 || bullet.x > canvas.width ||
+                            bullet.y < 0 || bullet.y > canvas.height) {
+                            shouldExplode = true;
+                        }
+
+                        if (shouldExplode) {
+                            bullet.explode(zombies);
+                            bullets.splice(bIndex, 1);
+                        }
+                    }
+                });
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        let mouseDown = false;
+        canvas.addEventListener('mousedown', () => mouseDown = true);
+        canvas.addEventListener('mouseup', () => mouseDown = false);
+
+        gameLoop();
+
+        // PowerUp class
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.radius = 15;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Draw glow effect
+                const gradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 20);
+                gradient.addColorStop(0, this.type === 'health' ? 'rgba(46, 204, 113, 0.3)' : 'rgba(241, 196, 15, 0.3)');
+                gradient.addColorStop(1, 'transparent');
+
+                ctx.beginPath();
+                ctx.fillStyle = gradient;
+                ctx.arc(0, 0, 20, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw power-up icon
+                ctx.beginPath();
+                ctx.fillStyle = this.type === 'health' ? '#2ecc71' : '#f1c40f';
+                if (this.type === 'health') {
+                    // Draw health cross
+                    ctx.fillRect(-8, -2, 16, 4);
+                    ctx.fillRect(-2, -8, 4, 16);
+                } else {
+                    // Draw speed arrow
+                    ctx.moveTo(-8, -8);
+                    ctx.lineTo(8, 0);
+                    ctx.lineTo(-8, 8);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+
+            effect(player) {
+                if (this.type === 'health') {
+                    player.health = Math.min(player.maxHealth, player.health + 30);
+                    createFloatingText(player.x, player.y, "+30 HP", "#2ecc71");
+                } else if (this.type === 'speedBoost') {
+                    player.speed *= 1.5;
+                    setTimeout(() => player.speed /= 1.5, 5000);
+                    createFloatingText(player.x, player.y, "Speed Boost!", "#f1c40f");
+                }
+            }
+        }
+
+        // Fungsi untuk membuat floating text
+        function createFloatingText(x, y, text, color) {
+            const floatingText = {
+                x: x,
+                y: y,
+                text: text,
+                color: color,
+                life: 50
+            };
+            floatingTexts.push(floatingText);
+        }
+
+        // Tambahkan fungsi startZombieSpawn
+        let zombieSpawnInterval;
+        function startZombieSpawn() {
+            // Clear existing interval if any
+            if (zombieSpawnInterval) {
+                clearInterval(zombieSpawnInterval);
+            }
+
+            // Spawn zombie setiap 2 detik
+            zombieSpawnInterval = setInterval(() => {
+                if (gameState === 'playing' && zombies.length < zombiesInWave) {
+                    zombies.push(new Zombie());
+                }
+            }, 2000);
+        }
+
+        // Tambahkan class Explosion untuk efek ledakan
+        class Explosion {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 5;
+                this.maxRadius = 80;
+                this.opacity = 1;
+                this.particleCount = 12;
+                this.particles = [];
+
+                // Buat partikel ledakan
+                for (let i = 0; i < this.particleCount; i++) {
+                    this.particles.push({
+                        x: this.x,
+                        y: this.y,
+                        angle: (Math.PI * 2 / this.particleCount) * i,
+                        speed: Math.random() * 2 + 2
+                    });
+                }
+                document.getElementById('explosionSound').play();
+
+                // Add more particles
+                this.particleCount = 24;
+                this.maxRadius = 120;
+
+                // Screen shake on explosion
+                canvas.style.transform = `translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px)`;
+                setTimeout(() => canvas.style.transform = 'none', 100);
+            }
+
+            draw() {
+                // Gambar lingkaran ledakan
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(231, 76, 60, ${this.opacity})`;
+                ctx.fill();
+
+                // Gambar partikel
+                this.particles.forEach(particle => {
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(243, 156, 18, ${this.opacity})`;
+                    ctx.fill();
+                });
+            }
+
+            update() {
+                this.radius += (this.maxRadius - this.radius) * 0.3;
+                this.opacity -= 0.05;
+
+                // Update posisi partikel
+                this.particles.forEach(particle => {
+                    particle.x += Math.cos(particle.angle) * particle.speed;
+                    particle.y += Math.sin(particle.angle) * particle.speed;
+                });
+
+                return this.opacity > 0;
+            }
+        }
+
+        // Tambahkan array untuk menyimpan ledakan
+        let explosions = [];
+
+        // Tambahkan fungsi untuk background music
+        function startBackgroundMusic() {
+            const music = document.getElementById('backgroundMusic');
+            music.volume = 0.3;
+            music.play();
+        }
+
+        // Tambahkan fungsi untuk navigasi shop
+        function scrollShop(direction) {
+            const container = document.querySelector('.shop-container');
+            const scrollAmount = 350; // Sesuaikan dengan lebar item + gap
+
+            if (direction === 'left') {
+                container.scrollBy({
+                    left: -scrollAmount,
+                    behavior: 'smooth'
+                });
+            } else {
+                container.scrollBy({
+                    left: scrollAmount,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // Tambahkan fungsi untuk mengatur volume semua suara
+        function setGameSoundVolume(volume) {
+            const sounds = [
+                'shootSound', 'explosionSound', 'zombieDeathSound',
+                'playerHitSound', 'backgroundMusic', 'pistolSound',
+                'machineGunSound', 'shotgunSound', 'sniperSound',
+                'laserSound', 'rocketSound'
+            ];
+
+            sounds.forEach(soundId => {
+                const sound = document.getElementById(soundId);
+                if (sound) {
+                    sound.volume = volume;
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

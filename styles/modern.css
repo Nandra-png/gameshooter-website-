@@ -1,0 +1,157 @@
+/* Modern styling untuk game UI */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --accent-color: #e74c3c;
+    --background-dark: #1a1a1a;
+    --text-light: #ecf0f1;
+    --neon-glow: 0 0 10px var(--primary-color);
+}
+
+/* Modern Menu Screen */
+.modern-menu {
+    background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(26,26,26,0.95));
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--primary-color);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: var(--neon-glow);
+    animation: menuFloat 3s ease-in-out infinite;
+}
+
+.menu-title {
+    font-size: 4em;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: var(--neon-glow);
+    margin-bottom: 30px;
+}
+
+/* Modern Buttons */
+.modern-button {
+    background: linear-gradient(45deg, var(--primary-color), #2980b9);
+    border: none;
+    border-radius: 30px;
+    padding: 15px 40px;
+    color: var(--text-light);
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.modern-button:hover::before {
+    left: 100%;
+}
+
+/* Modern HUD */
+.modern-hud {
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--primary-color);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    gap: 20px;
+    box-shadow: var(--neon-glow);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-icon {
+    font-size: 1.5em;
+    color: var(--primary-color);
+}
+
+/* Weapon Wheel */
+.weapon-wheel {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.8);
+    border: 2px solid var(--primary-color);
+    display: none;
+    transform-origin: center;
+    animation: wheelAppear 0.3s ease-out;
+}
+
+.weapon-segment {
+    position: absolute;
+    width: 50%;
+    height: 2px;
+    background: var(--primary-color);
+    transform-origin: left center;
+    transition: all 0.3s ease;
+}
+
+/* Animations */
+@keyframes menuFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes wheelAppear {
+    from { transform: scale(0) rotate(-180deg); opacity: 0; }
+    to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Power-up Effects */
+.powerup-effect {
+    position: absolute;
+    pointer-events: none;
+    animation: powerupPulse 1s infinite;
+}
+
+@keyframes powerupPulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+/* Modern Shop UI */
+.modern-shop {
+    background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(26,26,26,0.98));
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--primary-color);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.shop-item-modern {
+    background: rgba(52, 152, 219, 0.1);
+    border: 1px solid var(--primary-color);
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.shop-item-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+} 
